@@ -1,10 +1,24 @@
 # Bot Half Under
 
+
+variancia_retorno é dado pelo tabela 
+|MOD|VAR|
+|---|---|
+|0.00|0.66|
+|0.25|0.70|
+|0.50|0.90|
+|0.75|0.74|
+
 s_da = Soma de ataques perigosos
+
 s_so = Soma de chutes a gol
+
 s_sf = Soma de chutes para fora do gol
+
 s_c  = Soma de escanteios
+
 s_g  = Soma de gols
+
 ```
 goalline = Total de gols ( Under ou Over) para o Full Time da odds fornecido pela casa de apostas 
 ```
@@ -23,13 +37,7 @@ INDICE2=-0.473*INDICE1 -0.034*goalline_mod -0.1839*probUnder
 ```
 media_retorno=1.15468*INDICE2 + 0.11419  
 ```
-variancia_retorno é dado pelo tabela 
-|MOD|VAR|
-|---|---|
-|0.00|0.66|
-|0.25|0.70|
-|0.50|0.90|
-|0.75|0.74|
+
 
 ```
 %Kelly = media_retorno / (media_retorno^2 + variancia_retorno)
