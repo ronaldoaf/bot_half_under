@@ -31,7 +31,7 @@ INDICE2=-0.473*INDICE1 -0.034*goalline_mod -0.1839*probUnder
 ```
 media_retorno=1.15468*INDICE2 + 0.11419  
 ```
-variancia_retorno é dado pelo tabela 
+variancia_retorno é dado pela tabela 
 
 |MOD|VAR|
 |---|---|
