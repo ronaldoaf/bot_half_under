@@ -1,2 +1,9 @@
-# Gerenciador_de_Abas_BOT
-Exemplo de uma extensão para o Chrome que abre determinas abas e verifica se elas se mantem ativas
+# Bot Half Under
+
+|MOD|VAR|
+|---|---|
+|0.00|0.66|
+|0.25|0.7|
+|0.50|0.9|
+|0.75|0.74|
+
