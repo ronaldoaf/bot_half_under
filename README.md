@@ -20,7 +20,7 @@ goalline = Total de gols ( Under ou Over) para o Full Time da odds fornecido pel
 INDICE1=0.0005 *s_da + 0.0129*s_so + 0.0114 * s_sf + 0.0104*s_c + 0.043*s_g -0.183*(goalline -  s_g)
 ```
 ```
-probUnder=1/oddsUnder/(1/oddsUnder + 1/oddsOver)
+probUnder=1.02/oddsUnder/(1.02/oddsUnder + 0.98/oddsOver)
 ```
 ```
 goalline_mod=goalline % 1    (pode ser 0, 0.25, 0.5 ou 0.75) 
