@@ -82,7 +82,7 @@ unsafeWindow.bot={};
 bot.apostando_agora=false;
 bot.betslipBarEnhanced_selecionado=false;
 bot.copiado_betslip=false
-
+//bot.fila_de_apostas=[];
 
 
 bot.stake=function(){
@@ -100,17 +100,10 @@ bot.stake=function(){
 	});
 	
 	soma+=bot.balance; 
-
-	//n_jogo=Number( GM_getValue('n_jogo') );
-	//if (n_jogo<=30.0) n_jogo=30.0;
-	n_jogo=30.0;
-	percent=CONFIG.percent/(n_jogo*0.10);  
-      
     
-	
-	
-	
-	return (Math.floor(soma*percent)+0.5);
+    var indicador=+(bot.fila_de_apostas[0].percent_da_banca.toFixed(2))*5;
+	//return (Math.floor(soma*bot.fila_de_apostas[0].percent_da_banca)+0.25);
+    return (Math.floor(soma*bot.fila_de_apostas[0].percent_da_banca)+indicador);
 };
 
 bot.jogoLive = function (home,away){
@@ -160,8 +153,8 @@ bot.jogoLive = function (home,away){
 	jogo.AH_Home=ahSel(jogo.selHome);
 	jogo.AH_Away=ahSel(jogo.selAway);
 	
-	//jogo.OddsOver=Number(jogo.selHome.find('.ip-Participant_OppOdds').text(); 
-	//jogo.OddsUnder=umber(jogo.selAway.find('.ip-Participant_OppOdds').text(); 
+	jogo.odds_Over=Number(jogo.selHome.find('.ip-Participant_OppOdds').text()); 
+	jogo.odds_Under=Number(jogo.selAway.find('.ip-Participant_OppOdds').text()); 
 	
 	
 	return jogo;
@@ -172,7 +165,7 @@ bot.jaFoiApostado=function(home,away){
 	
 	var retorno=false;
 	$(myBetsList).each(function(){		
-		if ( (this.match==home+' v '+away) && (this.mercado.includes('Handicap'))    )  retorno=true;
+		if ( (this.match==home+' v '+away) && (this.mercado.includes('Goal Line'))    )  retorno=true;
 		
 	});
 	return retorno;
@@ -208,13 +201,22 @@ bot.onLoadStats=function(response){
     
     var anota_apostas=[];
    //Para jogo no cupom
+   
+   bot.fila_de_apostas=[];
+   var tabela_de_variancias={
+       0   : 0.66,
+       0.25: 0.70,
+       0.50: 0.90,
+       0.75: 0.74
+   };
    $('.ipe-ParticipantCouponFixtureName_Participant').each(function(i,e){
 
 	   var home=$(e).find('.ipe-ParticipantCouponFixtureName_TeamName:eq(0)').text();
 	   var away=$(e).find('.ipe-ParticipantCouponFixtureName_TeamName:eq(1)').text();
 	   
 	   //anota_apostas.push([jogo)+'<<<>>>'+JSON.stringify(jogos)+'<<<>>>'+bot.textMyBets+'<<<>>>>'+ $('#MarketGrid').html() );
-	   //Cada jogo do Ajax       
+	   //Cada jogo do Ajax
+
 	   $(jogos).each(function(ii,jogo){			   
 			 //if (apostando_agora) return;
 		   
@@ -223,25 +225,65 @@ bot.onLoadStats=function(response){
 				   //Se a aba myBets não foi atualiza nos últimos 2 segundos sai;
 				   if( ( +new Date() ) - Number(localStorage.myBetsLastUpdate) >2000) return;
 				   
-				   //Se já houve aposta nesse jogo sai.
-				   if( bot.jaFoiApostado(home,away) ) return;
+				   //Senão estiver no half time sai
+                   if( jogo.time != 'half') return;                   
+                   //Se tiver cartão vermelho sai
+                   if( (jogo.rHf+jogo.rAf )>0) return;   
+                   //Se quase não tiver ataque perigosos sai, porque pode ser um jogo com erro nos dados
+                   if( (jogo.daHf+jogo.daAf )<5) return;  
+                   //Se já tiver um diferença de 3 gols mais gols sai
+                   if( Math.abs(jogo.gHf-jogo.gAf )>=3) return;                      
+                   //Se já houve aposta nesse jogo sai.
+				   if( bot.jaFoiApostado(home,away) ) return;   
+                   
 				   
+                   
 				   //Se o elemento DOM da linha do jogo 
 				   jogo_selecionado=bot.jogoLive(home,away);
                    
+                   
 					j=jogo;
-		
+                    j_sel=jogo_selecionado;
+                    
 					//Aposta no Under
 					goalline=jogo_selecionado.AH_Away;
+                    
+                    
 					//if (( ( jogo.ind<=-CONFIG.ind1 ) &&  ( jogo.ind2<=-CONFIG.ind2) && 	( jogo_selecionado.AH_Away>=0)  &&  ( jogo.gAm==0.0) && ( jogo.rA==0.0) &&  ( jogo.gHf-jogo.gAf<3) &&  ( (primeiroTempo() && (jogo_selecionado.tempo>=CONFIG.t1)) ||  (segundoTempo() && (jogo_selecionado.tempo>=CONFIG.t2))    ) ))  { bot.lista_de_apostas.push(home+' v '+away);  bot.apostar(jogo_selecionado.selAway); }
-					INDICE1=0.0005 *(j.daHf+j.daAf) + 0.0129*(j.soHf+j.soAf) + 0.0114 * (j.sfHf+j.sfAf) + 0.0104*(j.cHf+j.cAf) + 0.043*(j.gHf+j.gAf) -0.183*(goalline -  (j.gHf+j.gAf));
-					
-					//console.log(goalline, INDICE1);
-		   
+					var INDICE1=0.0005 *(j.daHf+j.daAf) + 0.0129*(j.soHf+j.soAf) + 0.0114 * (j.sfHf+j.sfAf) + 0.0104*(j.cHf+j.cAf) + 0.043*(j.gHf+j.gAf) -0.183*(goalline -  (j.gHf+j.gAf));
 
+                    var goalline_mod=goalline % 1;
+                    var probUnder=1.02/j_sel.odds_Under/(1.02/j_sel.odds_Under + 0.98/j_sel.odds_Over);
+                    
+                    var INDICE2=-0.473*INDICE1 -0.034*goalline_mod -0.1839*probUnder;
+                    console.log(home, away,INDICE2 );
+                    //Se o não atingir o indice mínimo não aposta
+                    if( INDICE2 <  CONFIG.minimo_indice_para_apostar) return;
+                    
+                    
+                    var media_retorno=1.8328*INDICE2+0.0742;
+                    
+                    var variancia_retorno=tabela_de_variancias[goalline_mod];
+                    
+                    var kelly = media_retorno / (Math.pow(media_retorno,2) + variancia_retorno)
+					//console.log(home, away,kelly );
+                    
+                    var percent_da_banca=kelly * CONFIG.percentual_de_kelly;                    
+                    if (percent_da_banca >  CONFIG.maximo_da_banca_por_aposta) percent_da_banca=CONFIG.maximo_da_banca_por_aposta;
+                    
+                    bot.fila_de_apostas.push( { 'sel_odds': jogo_selecionado.selAway, 'percent_da_banca':  percent_da_banca, 'home_away': home+' v '+away }  );
+                    bot.lista_de_apostas.push(home+' v '+away)
 			 }
+             
+             
 	   });
    });
+   if (bot.fila_de_apostas.length > 0 ){
+      bot.fila_de_apostas.sort(function(a,b) { return a.percent_da_banca<b.percent_da_banca  } );          
+      bot.lista_de_apostas.push(bot.fila_de_apostas[0].home_away);
+      bot.apostar(bot.fila_de_apostas[0].sel_odds);
+   }
+
 
    
    
@@ -340,19 +382,22 @@ unsafeWindow.setInterval(function(){
 
 	   //Para cada seleção no BetSlip
 	   $('.betSlip .selectionRow').each(function(i,e){ 
-		   console.log( $(e).find('.fullSlipMode:eq(1)').text() );	   
+		   //console.log( $(e).find('.fullSlipMode:eq(1)').text(),bot.lista_de_apostas );	   
 
 		   //Se o jogo que aparece no betSlip está na lista de apostas preenche o stake e Handicap
-		   if( ($.inArray( $(e).find('.fullSlipMode:eq(1)').text(), bot.lista_de_apostas )>-1) && ($(e).find('.fullSlipMode:eq(0)').text().includes('Handicap')) ) {
+           
+		   //if( ($.inArray( $(e).find('.fullSlipMode:eq(1)').text(), bot.lista_de_apostas )>-1) && ($(e).find('.fullSlipMode:eq(0)').text().includes('Goal Line')) ) {
 			   $(e).find('.stk').val(  bot.stake() );   
-		   }
+               
+               console.log(bot.stake());
+		   //}
 		   //Caso não esteja na lista de apostas remove do BetSlip
-		   else {
-			   $(e).find('a.remove').rclick();		
-			   console.log('Removeu: ' +  $(e).find('.fullSlipMode:eq(1)').text() );
+		   //else {
+			//   $(e).find('a.remove').rclick();		
+			//   console.log('Removeu: ' +  $(e).find('.fullSlipMode:eq(1)').text() );
 
-		   }
-	   });
+		   //}
+	   });//
 
 	   console.log(bot.lista_de_apostas);	
 

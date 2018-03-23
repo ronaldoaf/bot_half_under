@@ -2,9 +2,9 @@
    "browser_action": {
       "default_icon": "images/logo_32.png",
       "default_popup": "popup.html",
-      "default_title": "Bot365 v2"
+      "default_title": "Bot Half Under"
    },
-   "description": "Bot para fazer asian handicap live, com a estratégia do Seu Cuca",
+   "description": "Bot para fazer apostas no Under Goal Line no Intervalo, com a estratégia do Seu Cuca",
    "icons": {
       "128": "images/logo_128.png",
       "16": "images/logo_16.png",
