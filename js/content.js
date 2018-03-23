@@ -160,8 +160,8 @@ bot.jogoLive = function (home,away){
 	jogo.AH_Home=ahSel(jogo.selHome);
 	jogo.AH_Away=ahSel(jogo.selAway);
 	
-	#jogo.OddsOver=Number(jogo.selHome.find('.ip-Participant_OppOdds').text(); 
-	#jogo.OddsUnder=umber(jogo.selAway.find('.ip-Participant_OppOdds').text(); 
+	//jogo.OddsOver=Number(jogo.selHome.find('.ip-Participant_OppOdds').text(); 
+	//jogo.OddsUnder=umber(jogo.selAway.find('.ip-Participant_OppOdds').text(); 
 	
 	
 	return jogo;
